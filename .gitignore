@@ -1,0 +1,22 @@
+# Virtual environments
+stockapp_env/
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs / outputs
+*.log
+outputs/
+data/

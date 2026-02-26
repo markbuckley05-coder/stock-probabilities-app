@@ -1,0 +1,5 @@
+numpy==2.4.2
+packaging==26.0
+scipy==1.17.1
+setuptools==82.0.0
+wheel==0.46.3
