@@ -1,7 +1,9 @@
 streamlit
 yfinance
-pandas
 numpy
+pandas
 plotly
-scipy
+scikit-learn
 hmmlearn
+scipy
+
