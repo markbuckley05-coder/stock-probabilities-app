@@ -1,3 +1,5 @@
+st.caption("DEPLOY CHECK: V2 build 2026-03-03 A")
+
 import datetime as dt
 import warnings
 
