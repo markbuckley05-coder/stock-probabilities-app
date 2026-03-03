@@ -739,7 +739,7 @@ if st.button("🚀 Compute v2 (Horizon Probabilities + Validation)", key="comput
             ["Rise", "Fall"],
             default="Stay",
         ),
-        np.nan,
+        "NA",   # <-- was np.nan (NumPy 2.x dtype promotion error)
     )
 
     data["Correct"] = np.where(
