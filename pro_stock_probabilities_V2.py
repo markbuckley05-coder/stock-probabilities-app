@@ -420,7 +420,7 @@ def walk_forward_probabilities_logistic(
         pipe = Pipeline(
             steps=[
                 ("scaler", StandardScaler(with_mean=True, with_std=True)),
-                ("clf", LogisticRegression(multi_class="multinomial", solver="lbfgs", max_iter=2000)),
+                ("clf", LogisticRegression(solver="lbfgs", max_iter=2000)),
             ]
         )
         pipe.fit(X_train, y_train)
@@ -485,7 +485,7 @@ def fit_logistic_for_live_prediction(
     pipe = Pipeline(
         steps=[
             ("scaler", StandardScaler(with_mean=True, with_std=True)),
-            ("clf", LogisticRegression(multi_class="multinomial", solver="lbfgs", max_iter=2000)),
+            ("clf", LogisticRegression(solver="lbfgs", max_iter=2000)),
         ]
     )
     pipe.fit(X, y)
