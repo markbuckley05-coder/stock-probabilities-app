@@ -20,3 +20,6 @@ Thumbs.db
 *.log
 outputs/
 data/
+# Local backups (do not commit)
+local_backups/
+
