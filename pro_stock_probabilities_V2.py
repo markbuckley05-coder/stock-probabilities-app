@@ -729,18 +729,18 @@ if st.button("🚀 Compute v2 (Horizon Probabilities + Validation)", key="comput
     data.loc[has_probs, pcols] = data.loc[has_probs, pcols].div(row_sum[has_probs], axis=0)
 
     # Predicted class (argmax) ONLY where probabilities exist (for default engine)
-    data["PredClass"] = np.where(
-        has_probs,
-        np.select(
-            [
-                (data["P_Rise"] >= data["P_Stay"]) & (data["P_Rise"] >= data["P_Fall"]),
-                (data["P_Fall"] > data["P_Rise"]) & (data["P_Fall"] >= data["P_Stay"]),
-            ],
-            ["Rise", "Fall"],
-            default="Stay",
-        ),
-        "NA",   # <-- was np.nan (NumPy 2.x dtype promotion error)
-    )
+    pred_labels = np.select(
+        [
+            (data["P_Rise"] >= data["P_Stay"]) & (data["P_Rise"] >= data["P_Fall"]),
+            (data["P_Fall"] > data["P_Rise"]) & (data["P_Fall"] >= data["P_Stay"]),
+        ],
+        ["Rise", "Fall"],
+        default="Stay",
+    ).astype(object)
+
+    # Create as an object column with proper missing values
+    data["PredClass"] = pd.Series(pd.NA, index=data.index, dtype="object")
+    data.loc[has_probs, "PredClass"] = pred_labels[has_probs.to_numpy()]
 
     data["Correct"] = np.where(
         data["PredClass"].isna() | data["Y"].isna(),
@@ -850,24 +850,23 @@ if "v2_data" in st.session_state:
     data.loc[has_probs, pcols] = data.loc[has_probs, pcols].div(row_sum[has_probs], axis=0)
 
     # Recompute PredClass/Correct/HitRate_50 for chosen engine (so inspector/cal/backtest match)
-    data["PredClass"] = np.where(
-        has_probs,
-        np.select(
-            [
-                (data["P_Rise"] >= data["P_Stay"]) & (data["P_Rise"] >= data["P_Fall"]),
-                (data["P_Fall"] > data["P_Rise"]) & (data["P_Fall"] >= data["P_Stay"]),
-            ],
-            ["Rise", "Fall"],
-            default="Stay",
-        ),
-        np.nan,
-    )
+    # NOTE: avoid np.where() mixing strings and np.nan (causes NumPy DTypePromotionError)
+    pred_labels = np.select(
+        [
+            (data["P_Rise"] >= data["P_Stay"]) & (data["P_Rise"] >= data["P_Fall"]),
+            (data["P_Fall"] > data["P_Rise"]) & (data["P_Fall"] >= data["P_Stay"]),
+        ],
+        ["Rise", "Fall"],
+        default="Stay",
+    ).astype(object)
 
-    data["Correct"] = np.where(
-        data["PredClass"].isna() | data["Y"].isna(),
-        np.nan,
-        (data["PredClass"] == data["Y"]).astype(float),
-    )
+    data["PredClass"] = pd.Series(pd.NA, index=data.index, dtype="object")
+    data.loc[has_probs, "PredClass"] = pred_labels[has_probs.to_numpy()]
+
+    # Correct + rolling hit rate
+    valid_eval = data["PredClass"].notna() & data["Y"].notna()
+    data["Correct"] = pd.Series(pd.NA, index=data.index, dtype="float64")
+    data.loc[valid_eval, "Correct"] = (data.loc[valid_eval, "PredClass"] == data.loc[valid_eval, "Y"]).astype(float)
     data["HitRate_50"] = data["Correct"].rolling(50, min_periods=10).mean()
 
     # Defensive numeric coercion (prevents Plotly odd behaviour on reruns)
